@@ -47,7 +47,7 @@ function AdminPanel({ theme = "dark" }) {
 
   // ✅ COLORS - DEFINED EARLY AND SAFELY
   const colors = themeConfig[theme] || themeConfig.dark;
-  const API_BASE = "http://localhost:5000/api";
+  const API_BASE = "https://backend-pulsepoint.onrender.com/api";
 
   const verifyPassword = useCallback(() => {
     if (passwordInput === ADMIN_PASSWORD) {
