@@ -190,7 +190,7 @@ function UserPage({ theme = "dark" }) {
 
   /* Fetch Hospitals */
   useEffect(() => {
-    axios.get("http://localhost:5000/api/hospitals").then((res) => {
+    axios.get("https://backend-pulsepoint.onrender.com/api/hospitals").then((res) => {
       setHospitals(res.data.map((h) => ({
         ...h,
         latitude: Number(h.latitude),
