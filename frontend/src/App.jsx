@@ -4,21 +4,17 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContent";
 import SearchResults from "./pages/SearchResults";
-
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import SignUp from "./pages/Signup";
 import CartPage from "./pages/CartPage";
 import OrderHistory from "./pages/OrderHistory";
 import AdminPanel from "./pages/AdminPanel"; // ✅ Import Admin Panel
-
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-
 function AppContent() {
   return (
     <>
@@ -37,7 +33,6 @@ function AppContent() {
     </>
   );
 }
-
 function App() {
   return (
     <Router>
@@ -49,5 +44,4 @@ function App() {
     </Router>
   );
 }
-
 export default App;
