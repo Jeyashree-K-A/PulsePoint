@@ -82,6 +82,15 @@ function UserPage({ theme = "dark" }) {
   const userMarkerRef = useRef(null);
   const mapRef = useRef(null);
 
+  // Use refs to always have latest values inside watchPosition callback
+  const isNavigationActiveRef = useRef(isNavigationActive);
+  const selectedHospitalRef = useRef(selectedHospital);
+  const destinationReachedRef = useRef(destinationReached);
+
+  useEffect(() => { isNavigationActiveRef.current = isNavigationActive; }, [isNavigationActive]);
+  useEffect(() => { selectedHospitalRef.current = selectedHospital; }, [selectedHospital]);
+  useEffect(() => { destinationReachedRef.current = destinationReached; }, [destinationReached]);
+
   /* Theme Config */
   const themeConfig = {
     dark: {
@@ -148,45 +157,44 @@ function UserPage({ theme = "dark" }) {
     }
   }, [theme]);
 
-  /* GPS Location with continuous tracking */
+  /* GPS Location - Live tracking with watchPosition directly (no getCurrentPosition first) */
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          setLocation(loc);
-          
-          const watchId = navigator.geolocation.watchPosition(
-            (pos) => {
-              const newLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-              setLocation(newLoc);
-              
-              if (isNavigationActive && selectedHospital) {
-                const distanceToDestination = getDistance(
-                  newLoc.lat, 
-                  newLoc.lng, 
-                  selectedHospital.latitude, 
-                  selectedHospital.longitude
-                );
-                setCurrentDistance(distanceToDestination);
-                
-                if (distanceToDestination < 0.05 && !destinationReached) {
-                  setDestinationReached(true);
-                  setIsNavigationActive(false);
-                }
-              }
-            },
-            () => {},
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
-          );
-          
-          return () => navigator.geolocation.clearWatch(watchId);
-        },
-        () => setLocation({ lat: 9.9252, lng: 78.1198 }),
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
+    if (!navigator.geolocation) {
+      // Fallback if geolocation not supported
+      setLocation({ lat: 9.9252, lng: 78.1198 });
+      return;
     }
-  }, [isNavigationActive, selectedHospital, destinationReached]);
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const newLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setLocation(newLoc);
+
+        // Navigation distance update using refs (always fresh values)
+        if (isNavigationActiveRef.current && selectedHospitalRef.current) {
+          const distanceToDestination = getDistance(
+            newLoc.lat,
+            newLoc.lng,
+            selectedHospitalRef.current.latitude,
+            selectedHospitalRef.current.longitude
+          );
+          setCurrentDistance(distanceToDestination);
+
+          if (distanceToDestination < 0.05 && !destinationReachedRef.current) {
+            setDestinationReached(true);
+            setIsNavigationActive(false);
+          }
+        }
+      },
+      () => {
+        // On error, only set fallback if location not already set
+        setLocation((prev) => prev || { lat: 9.9252, lng: 78.1198 });
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []); // Run only once on mount
 
   /* Fetch Hospitals */
   useEffect(() => {
@@ -219,7 +227,7 @@ function UserPage({ theme = "dark" }) {
       const url = `https://router.project-osrm.org/route/v1/driving/${location.lng},${location.lat};${hospital.longitude},${hospital.latitude}?overview=full`;
       const res = await fetch(url);
       const data = await res.json();
-      
+
       if (data.routes?.[0]?.geometry) {
         setRouteCoordinates(data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]));
       } else {
@@ -270,7 +278,7 @@ function UserPage({ theme = "dark" }) {
         background: colors.bg, color: colors.text, fontSize: 18, textAlign: 'center'
       }}>
         <div style={{
-          width: 70, height: 70, 
+          width: 70, height: 70,
           border: `4px solid ${theme === 'dark' ? 'rgba(0,212,255,0.3)' : 'rgba(59,130,246,0.3)'}`,
           borderTop: `4px solid ${colors.neon}`, borderRadius: '50%',
           animation: 'spin 1s linear infinite'
@@ -293,12 +301,12 @@ function UserPage({ theme = "dark" }) {
   const hospitalsToShow = searchedHospital ? [searchedHospital] : hospitalsWithDistance;
   const nearbyHospitalsCount = hospitalsWithDistance.filter(h => h.distance <= 5).length;
 
-  const bounds = selectedHospital && !shouldCenterOnUser ? 
+  const bounds = selectedHospital && !shouldCenterOnUser ?
     [[location.lat, location.lng], [selectedHospital.latitude, selectedHospital.longitude]] : [];
 
   return (
     <div style={{ height: "100vh", width: "100vw", position: "relative", overflow: "hidden" }}>
-      
+
       {destinationReached && (
         <div style={{
           position: 'fixed',
@@ -633,18 +641,18 @@ function UserPage({ theme = "dark" }) {
         )}
       </div>
 
-      <MapContainer 
-        center={[location.lat, location.lng]} 
-        zoom={13} 
-        style={{ height: "100vh", width: "100vw" }} 
+      <MapContainer
+        center={[location.lat, location.lng]}
+        zoom={13}
+        style={{ height: "100vh", width: "100vw" }}
         ref={mapRef}
         zoomControl={true}
         scrollWheelZoom={true}
       >
         <TileLayer url={colors.mapTile} attribution={colors.mapAttribution} />
 
-        <Circle center={[location.lat, location.lng]} radius={5000} pathOptions={{ 
-          color: colors.neon, fillColor: colors.neon, fillOpacity: 0.2, weight: 3 
+        <Circle center={[location.lat, location.lng]} radius={5000} pathOptions={{
+          color: colors.neon, fillColor: colors.neon, fillOpacity: 0.2, weight: 3
         }} />
 
         <Marker position={[location.lat, location.lng]} ref={userMarkerRef}>
