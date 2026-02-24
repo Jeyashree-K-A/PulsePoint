@@ -210,7 +210,7 @@ function AdminPanel({ theme = "dark" }) {
   if (!isAuthenticated) {
     return (
       <div style={{
-        minHeight: "100vh",
+        minHeight: "calc(100vh - 60px)",
         width: "100%",
         background: colors.bg,
         display: 'flex',
@@ -275,7 +275,7 @@ function AdminPanel({ theme = "dark" }) {
       `}</style>
 
       <div style={{
-        minHeight: "100vh",
+        minHeight: "calc(100vh - 60px)",
         width: "100%",
         background: colors.bg,
         padding: isMobile ? "12px" : "20px",
