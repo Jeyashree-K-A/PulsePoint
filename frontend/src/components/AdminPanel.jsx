@@ -231,9 +231,9 @@ function AdminPanel({ theme = "dark" }) {
   if (!isAuthenticated) {
     return (
       <div style={{ 
-        height: "100vh", width: "100vw", background: colors.bg, 
+        minHeight: "100vh", width: "100%", background: colors.bg, 
         display: 'flex', alignItems: 'center', justifyContent: 'center', 
-        color: colors.text, padding: '20px', position: 'fixed', top: 0, left: 0, zIndex: 9999,
+        color: colors.text, padding: '20px',
         boxSizing: 'border-box'
       }}>
         <div style={{
@@ -283,7 +283,7 @@ function AdminPanel({ theme = "dark" }) {
       padding: isMobile ? "12px" : "20px",
       fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
       color: colors.text,
-      overflowY: "auto",
+      overflowX: "hidden",
       boxSizing: 'border-box'
     }}>
       {/* Header */}
@@ -385,8 +385,8 @@ function AdminPanel({ theme = "dark" }) {
             ref={hospitalsListRef}
             style={{ 
               height: isMobile ? 'auto' : '500px',
-              maxHeight: isMobile ? '600px' : '500px',
-              overflowY: 'auto',
+              maxHeight: isMobile ? 'none' : '500px',
+              overflowY: isMobile ? 'visible' : 'auto',
               display: 'flex', 
               flexDirection: 'column',
               gap: '14px',
