@@ -5,19 +5,26 @@ function AdminPanel({ theme = "dark" }) {
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [hospitals, setHospitals] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // ✅ NEW SEARCH STATE
+  const [searchTerm, setSearchTerm] = useState("");
   const [newHospital, setNewHospital] = useState({
     name: "", latitude: "", longitude: "", address: ""
   });
   const [editHospital, setEditHospital] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const hospitalsListRef = useRef(null);
   const passwordRef = useRef(null);
 
   const ADMIN_PASSWORD = "admin123";
 
-  // ✅ THEME CONFIG - MOVED TO TOP
+  // ✅ Detect mobile/resize
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const themeConfig = {
     dark: {
       bg: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)',
@@ -45,7 +52,6 @@ function AdminPanel({ theme = "dark" }) {
     }
   };
 
-  // ✅ COLORS - DEFINED EARLY AND SAFELY
   const colors = themeConfig[theme] || themeConfig.dark;
   const API_BASE = "https://backend-pulsepoint.onrender.com/api";
 
@@ -82,7 +88,6 @@ function AdminPanel({ theme = "dark" }) {
     }
   }, [API_BASE]);
 
-  // ✅ FILTER HOSPITALS BY SEARCH
   const filteredHospitals = hospitals.filter(hospital =>
     hospital.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -193,14 +198,13 @@ function AdminPanel({ theme = "dark" }) {
     }
   };
 
-  // ✅ STYLES - All using 'colors' safely
   const getInputStyle = () => ({
-    padding: '15px 20px',
+    padding: isMobile ? '12px 16px' : '15px 20px',
     background: colors.inputBg,
     border: `2px solid ${colors.cardBorder}`,
     borderRadius: '12px',
     color: colors.text,
-    fontSize: '16px',
+    fontSize: isMobile ? '14px' : '16px',
     outline: 'none',
     backdropFilter: 'blur(10px)',
     width: '100%',
@@ -210,12 +214,12 @@ function AdminPanel({ theme = "dark" }) {
   });
 
   const getButtonStyle = () => ({
-    padding: '18px',
+    padding: isMobile ? '14px' : '18px',
     background: colors.buttonBg,
     color: 'white',
     border: 'none',
     borderRadius: '15px',
-    fontSize: '16px',
+    fontSize: isMobile ? '14px' : '16px',
     fontWeight: '700',
     cursor: 'pointer',
     boxShadow: `0 10px 30px ${colors.neon}50`,
@@ -224,45 +228,30 @@ function AdminPanel({ theme = "dark" }) {
     fontFamily: 'inherit'
   });
 
-  const smallLogoutStyle = {
-    padding: '8px 16px',
-    background: colors.dangerBg,
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    boxShadow: `0 4px 12px rgba(255,71,87,0.4)`,
-    transition: 'all 0.3s ease',
-    alignSelf: 'flex-end',
-    minWidth: 'fit-content',
-    marginTop: '10px'
-  };
-
   if (!isAuthenticated) {
     return (
       <div style={{ 
         height: "100vh", width: "100vw", background: colors.bg, 
         display: 'flex', alignItems: 'center', justifyContent: 'center', 
-        color: colors.text, padding: '20px', position: 'fixed', top: 0, left: 0, zIndex: 9999
+        color: colors.text, padding: '20px', position: 'fixed', top: 0, left: 0, zIndex: 9999,
+        boxSizing: 'border-box'
       }}>
         <div style={{
-          background: colors.cardBg, padding: '40px', borderRadius: '24px',
+          background: colors.cardBg, padding: isMobile ? '28px 20px' : '40px', borderRadius: '24px',
           border: `2px solid ${colors.neon}`, boxShadow: `0 25px 50px ${colors.shadow}`,
-          backdropFilter: 'blur(20px)', minWidth: '400px', maxWidth: '500px', textAlign: 'center'
+          backdropFilter: 'blur(20px)', width: '100%', maxWidth: '460px', textAlign: 'center'
         }}>
-          <div style={{ fontSize: '64px', marginBottom: '20px' }}>🔐</div>
-          <h1 style={{ fontSize: '28px', fontWeight: '900', marginBottom: '10px', color: colors.neon, textShadow: `0 0 20px ${colors.neon}40` }}>
+          <div style={{ fontSize: isMobile ? '48px' : '64px', marginBottom: '16px' }}>🔐</div>
+          <h1 style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: '900', marginBottom: '10px', color: colors.neon, textShadow: `0 0 20px ${colors.neon}40` }}>
             ADMIN PANEL
           </h1>
-          <p style={{ fontSize: '16px', color: colors.textSecondary, marginBottom: '30px' }}>
+          <p style={{ fontSize: isMobile ? '14px' : '16px', color: colors.textSecondary, marginBottom: '24px' }}>
             Enter admin password to access hospital management
           </p>
           <input
             ref={passwordRef}
             type="password"
-            style={{ ...getInputStyle(), textAlign: 'center', letterSpacing: '4px', fontFamily: 'monospace', marginBottom: '20px' }}
+            style={{ ...getInputStyle(), textAlign: 'center', letterSpacing: '4px', fontFamily: 'monospace', marginBottom: '16px' }}
             placeholder="Enter password"
             value={passwordInput}
             onChange={(e) => setPasswordInput(e.target.value)}
@@ -271,8 +260,9 @@ function AdminPanel({ theme = "dark" }) {
           />
           {passwordError && (
             <div style={{
-              color: '#ff4757', background: 'rgba(255,71,87,0.2)', padding: '15px 20px',
-              borderRadius: '12px', marginBottom: '20px', border: '1px solid #ff4757'
+              color: '#ff4757', background: 'rgba(255,71,87,0.2)', padding: '12px 16px',
+              borderRadius: '12px', marginBottom: '16px', border: '1px solid #ff4757',
+              fontSize: isMobile ? '13px' : '15px'
             }}>
               {passwordError}
             </div>
@@ -287,25 +277,24 @@ function AdminPanel({ theme = "dark" }) {
 
   return (
     <div style={{
-      minHeight: "100vh", width: "100vw", background: colors.bg,
-      padding: "20px", fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-      color: colors.text , overflowY : "auto"
+      minHeight: "100vh",
+      width: "100%",
+      background: colors.bg,
+      padding: isMobile ? "12px" : "20px",
+      fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+      color: colors.text,
+      overflowY: "auto",
+      boxSizing: 'border-box'
     }}>
       {/* Header */}
       <div style={{
-        textAlign: 'center', marginBottom: '20px', padding: '20px',
+        textAlign: 'center', marginBottom: '16px', padding: isMobile ? '16px' : '20px',
         background: colors.cardBg, borderRadius: '24px', border: `1px solid ${colors.cardBorder}`,
         boxShadow: `0 25px 50px ${colors.shadow}`, backdropFilter: 'blur(20px)'
       }}>
-        { <h5 style={{ fontSize: '30px', fontWeight: '900', margin: '0 0 10px 0', color: colors.neon, textShadow: `0 0 20px ${colors.neon}40` }}>
+        <h5 style={{ fontSize: isMobile ? '22px' : '30px', fontWeight: '900', margin: 0, color: colors.neon, textShadow: `0 0 20px ${colors.neon}40` }}>
           🏥 Pulse Point
-        </h5> }
-        {/* <p style={{ fontSize: '16px', color: colors.textSecondary, margin: '0 0 15px 0' }}>
-          Manage emergency hospitals • Real-time location tracking
-        </p> */}
-        {/* <button onClick={() => setIsAuthenticated(false)} style={smallLogoutStyle}>
-          🚪 Logout
-        </button> */}
+        </h5>
       </div>
 
       {loading && (
@@ -321,25 +310,29 @@ function AdminPanel({ theme = "dark" }) {
         </div>
       )}
 
-      {/* Main Content Grid */}
+      {/* ✅ Responsive Grid: 1 col on mobile, 2 col on desktop */}
       <div style={{ 
-        display: 'grid', gap: '30px', gridTemplateColumns: '1fr 1fr',
-        maxWidth: '1400px', margin: '0 auto'
+        display: 'grid',
+        gap: isMobile ? '16px' : '30px',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+        maxWidth: '1400px',
+        margin: '0 auto'
       }}>
         {/* Add Hospital Form */}
         <div style={{
-          background: colors.cardBg, padding: '30px', borderRadius: '24px',
+          background: colors.cardBg, padding: isMobile ? '20px' : '30px', borderRadius: '24px',
           border: `1px solid ${colors.cardBorder}`, boxShadow: `0 25px 50px ${colors.shadow}`,
           backdropFilter: 'blur(20px)'
         }}>
-          <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '25px', color: colors.neon }}>
+          <h2 style={{ fontSize: isMobile ? '18px' : '24px', fontWeight: '700', marginBottom: '20px', color: colors.neon }}>
             ➕ Add New Hospital
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <input style={getInputStyle()} placeholder="Hospital Name *" value={newHospital.name} onChange={(e) => setNewHospital({ ...newHospital, name: e.target.value })} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <input style={getInputStyle()} placeholder="Latitude (13.xxx) *" value={newHospital.latitude} onChange={(e) => setNewHospital({ ...newHospital, latitude: e.target.value })} />
-              <input style={getInputStyle()} placeholder="Longitude (80.xxx) *" value={newHospital.longitude} onChange={(e) => setNewHospital({ ...newHospital, longitude: e.target.value })} />
+            {/* ✅ Lat/Lng: side by side on desktop, stacked on very small mobile */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile && window.innerWidth < 400 ? '1fr' : '1fr 1fr', gap: '12px' }}>
+              <input style={getInputStyle()} placeholder="Latitude *" value={newHospital.latitude} onChange={(e) => setNewHospital({ ...newHospital, latitude: e.target.value })} />
+              <input style={getInputStyle()} placeholder="Longitude *" value={newHospital.longitude} onChange={(e) => setNewHospital({ ...newHospital, longitude: e.target.value })} />
             </div>
             <input style={getInputStyle()} placeholder="Full Address (optional)" value={newHospital.address} onChange={(e) => setNewHospital({ ...newHospital, address: e.target.value })} />
             <button
@@ -356,24 +349,20 @@ function AdminPanel({ theme = "dark" }) {
           </div>
         </div>
 
-        {/* Hospitals List WITH SEARCH FILTER */}
+        {/* Hospitals List */}
         <div style={{
-          background: colors.cardBg, padding: '30px', borderRadius: '24px',
+          background: colors.cardBg, padding: isMobile ? '20px' : '30px', borderRadius: '24px',
           border: `1px solid ${colors.cardBorder}`, boxShadow: `0 25px 50px ${colors.shadow}`,
           backdropFilter: 'blur(20px)'
         }}>
-          <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '15px', color: colors.neon }}>
+          <h2 style={{ fontSize: isMobile ? '18px' : '24px', fontWeight: '700', marginBottom: '14px', color: colors.neon }}>
             📋 Hospitals ({filteredHospitals.length})
           </h2>
-          
-          {/* ✅ SEARCH INPUT */}
-          <div style={{ marginBottom: '25px' }}>
+
+          {/* Search */}
+          <div style={{ marginBottom: '18px' }}>
             <input
-              style={{
-                ...getInputStyle(),
-                padding: '15px 20px',
-                fontSize: '16px'
-              }}
+              style={getInputStyle()}
               placeholder="🔍 Search hospitals by name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -382,71 +371,75 @@ function AdminPanel({ theme = "dark" }) {
 
           {error && (
             <div style={{
-              textAlign: 'center', padding: '20px', color: '#ff4757',
+              textAlign: 'center', padding: '16px', color: '#ff4757',
               background: 'rgba(255,71,87,0.15)', borderRadius: '16px',
-              border: '1px solid #ff4757', marginBottom: '25px'
+              border: '1px solid #ff4757', marginBottom: '18px',
+              fontSize: isMobile ? '13px' : '15px'
             }}>
               ⚠️ {error}
             </div>
           )}
           
-          <div ref={hospitalsListRef} style={{ 
-            height: '500px', overflowY: 'auto', display: 'flex', 
-            flexDirection: 'column', gap: '18px', paddingRight: '10px' 
-          }}>
+          {/* ✅ List height: auto on mobile (scrolls with page), fixed on desktop */}
+          <div
+            ref={hospitalsListRef}
+            style={{ 
+              height: isMobile ? 'auto' : '500px',
+              maxHeight: isMobile ? '600px' : '500px',
+              overflowY: 'auto',
+              display: 'flex', 
+              flexDirection: 'column',
+              gap: '14px',
+              paddingRight: isMobile ? '0' : '10px'
+            }}
+          >
             {filteredHospitals.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '80px 20px', color: colors.textSecondary }}>
-                <div style={{ fontSize: '64px', marginBottom: '20px' }}>🏥</div>
-                <p style={{ fontSize: '18px' }}>
+              <div style={{ textAlign: 'center', padding: '60px 20px', color: colors.textSecondary }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏥</div>
+                <p style={{ fontSize: isMobile ? '15px' : '18px' }}>
                   {searchTerm ? `No hospitals found for "${searchTerm}"` : 'Add your first hospital above!'}
                 </p>
               </div>
             ) : (
               filteredHospitals.map((hospital) => (
                 <div key={hospital._id || Math.random()} style={{
-                  padding: '24px',
+                  padding: isMobile ? '16px' : '24px',
                   background: editHospital?._id === hospital._id ? `${colors.neon}15` : colors.inputBg,
                   borderRadius: '16px',
                   border: `2px solid ${editHospital?._id === hospital._id ? colors.neon : colors.cardBorder}`,
                   transition: 'all 0.3s ease',
-                  flexShrink: 0,
-                  minHeight: '120px'
+                  flexShrink: 0
                 }}>
                   {editHospital?._id === hospital._id ? (
-                    // EDIT MODE - SAME AS BEFORE
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: colors.neon }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+                        <h3 style={{ margin: 0, fontSize: isMobile ? '15px' : '20px', fontWeight: '700', color: colors.neon }}>
                           ✏️ Editing: {hospital.name}
                         </h3>
                         <button onClick={cancelEdit} disabled={loading} style={{
                           ...getButtonStyle(),
                           background: colors.dangerBg,
-                          padding: '8px 16px',
-                          fontSize: '14px',
+                          padding: '8px 14px',
+                          fontSize: '13px',
                           width: 'auto'
                         }}>
                           ❌ Cancel
                         </button>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <input value={editHospital.name} onChange={(e) => setEditHospital({ ...editHospital, name: e.target.value })} style={{
-                          ...getInputStyle(),
-                          border: `2px solid ${colors.neon}`
+                          ...getInputStyle(), border: `2px solid ${colors.neon}`
                         }} placeholder="Hospital Name *" />
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                           <input value={editHospital.latitude} onChange={(e) => setEditHospital({ ...editHospital, latitude: e.target.value })} style={{
-                            ...getInputStyle(),
-                            border: `2px solid ${colors.neon}`
+                            ...getInputStyle(), border: `2px solid ${colors.neon}`
                           }} placeholder="Latitude *" />
                           <input value={editHospital.longitude} onChange={(e) => setEditHospital({ ...editHospital, longitude: e.target.value })} style={{
-                            ...getInputStyle(),
-                            border: `2px solid ${colors.neon}`
+                            ...getInputStyle(), border: `2px solid ${colors.neon}`
                           }} placeholder="Longitude *" />
                         </div>
                         <input value={editHospital.address || ''} onChange={(e) => setEditHospital({ ...editHospital, address: e.target.value })} style={{
-                          ...getInputStyle(),
-                          border: `2px solid ${colors.neon}`
+                          ...getInputStyle(), border: `2px solid ${colors.neon}`
                         }} placeholder="Address (optional)" />
                         <button onClick={updateHospital} disabled={loading} style={{
                           ...getButtonStyle(),
@@ -457,38 +450,42 @@ function AdminPanel({ theme = "dark" }) {
                       </div>
                     </div>
                   ) : (
-                    // VIEW MODE - SAME AS BEFORE
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
-                        <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: colors.neon }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', gap: '10px' }}>
+                        <h3 style={{ margin: 0, fontSize: isMobile ? '15px' : '20px', fontWeight: '700', color: colors.neon, flex: 1, wordBreak: 'break-word' }}>
                           {hospital.name}
                         </h3>
-                        <div style={{ display: 'flex', gap: '12px' }}>
+                        {/* ✅ Buttons: stacked on mobile, side by side on desktop */}
+                        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '8px', flexShrink: 0 }}>
                           <button onClick={() => startEdit(hospital)} disabled={loading} style={{
-                            padding: '12px 20px', background: colors.buttonBg, color: 'white',
-                            border: 'none', borderRadius: '12px', fontSize: '14px',
+                            padding: isMobile ? '8px 12px' : '12px 20px',
+                            background: colors.buttonBg, color: 'white',
+                            border: 'none', borderRadius: '10px',
+                            fontSize: isMobile ? '12px' : '14px',
                             cursor: loading ? 'not-allowed' : 'pointer', fontWeight: '600',
-                            opacity: loading ? 0.6 : 1
+                            opacity: loading ? 0.6 : 1, whiteSpace: 'nowrap'
                           }}>
                             ✏️ Edit
                           </button>
                           <button onClick={() => deleteHospital(hospital._id)} disabled={loading} style={{
-                            padding: '12px 20px', background: colors.dangerBg, color: 'white',
-                            border: 'none', borderRadius: '12px', fontSize: '14px',
+                            padding: isMobile ? '8px 12px' : '12px 20px',
+                            background: colors.dangerBg, color: 'white',
+                            border: 'none', borderRadius: '10px',
+                            fontSize: isMobile ? '12px' : '14px',
                             cursor: loading ? 'not-allowed' : 'pointer', fontWeight: '600',
-                            opacity: loading ? 0.6 : 1
+                            opacity: loading ? 0.6 : 1, whiteSpace: 'nowrap'
                           }}>
                             🗑️ Delete
                           </button>
                         </div>
                       </div>
                       <div style={{ 
-                        fontSize: '15px', color: colors.textSecondary, padding: '12px 16px',
+                        fontSize: isMobile ? '13px' : '15px', color: colors.textSecondary, padding: '10px 14px',
                         background: `${colors.inputBg}cc`, borderRadius: '12px', border: `1px solid ${colors.cardBorder}`
                       }}>
                         <div>📍 {Number(hospital.latitude)?.toFixed(6)}°, {Number(hospital.longitude)?.toFixed(6)}°</div>
                         {hospital.address && (
-                          <div style={{ marginTop: '8px', fontSize: '14px', wordBreak: 'break-word' }}>
+                          <div style={{ marginTop: '6px', fontSize: isMobile ? '12px' : '14px', wordBreak: 'break-word' }}>
                             📋 {hospital.address}
                           </div>
                         )}
