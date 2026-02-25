@@ -51,7 +51,7 @@ Live Demo: https://pulsepoint-tgrl.onrender.com/
 ![Home Light](screenshots/HomePage(Light-Theme).png)
 
 ### 🌙 Home Page (Dark Theme)
-![Home Dark](screenshots/HomePage (Dark-Theme).png)
+![Home Dark](screenshots/HomePage(Dark-Theme).png)
 
 ### 🛠️ Admin Panel (Light Theme)
 ![Admin Light](screenshots/AdminPanel(Light-Theme).png)
