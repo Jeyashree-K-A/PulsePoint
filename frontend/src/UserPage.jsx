@@ -1,5 +1,7 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
+
 import {
   MapContainer,
   TileLayer,
@@ -9,38 +11,59 @@ import {
   Polyline,
   useMap,
 } from "react-leaflet";
+
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-/* Leaflet default icon fix */
+/* --------------------------------
+   LEAFLET DEFAULT ICON FIX
+--------------------------------- */
+
 delete L.Icon.Default.prototype._getIconUrl;
+
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-/* Custom Icons */
+/* --------------------------------
+   CUSTOM HOSPITAL MARKER ICONS
+--------------------------------- */
+
 const greenIcon = new L.Icon({
-  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
 
 const redIcon = new L.Icon({
-  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
 
-/* Distance calculation */
+/* --------------------------------
+   DISTANCE CALCULATION
+--------------------------------- */
+
 const getDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
-  const toRad = (v) => (v * Math.PI) / 180;
+
+  const toRad = (value) => (value * Math.PI) / 180;
+
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
+
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) *
@@ -50,20 +73,29 @@ const getDistance = (lat1, lon1, lat2, lon2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-/* Fit bounds component */
+/* --------------------------------
+   FIT MAP BOUNDS
+--------------------------------- */
+
 function FitBounds({ bounds, maxZoom }) {
   const map = useMap();
 
   useEffect(() => {
     if (bounds.length > 1) {
-      map.fitBounds(bounds, { padding: [60, 60], maxZoom });
+      map.fitBounds(bounds, {
+        padding: [60, 60],
+        maxZoom,
+      });
     }
   }, [bounds, map, maxZoom]);
 
   return null;
 }
 
-/* Center map on user location */
+/* --------------------------------
+   CENTER MAP ON USER
+--------------------------------- */
+
 function CenterOnUser({ center, zoom }) {
   const map = useMap();
 
@@ -76,14 +108,20 @@ function CenterOnUser({ center, zoom }) {
   return null;
 }
 
+/* --------------------------------
+   USER PAGE COMPONENT
+--------------------------------- */
+
 function UserPage({ theme = "dark" }) {
   const [location, setLocation] = useState(null);
   const [hospitals, setHospitals] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedHospital, setSelectedHospital] = useState(null);
+
   const [isNavigationActive, setIsNavigationActive] = useState(false);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
+
   const [currentDistance, setCurrentDistance] = useState(null);
   const [destinationReached, setDestinationReached] = useState(false);
   const [shouldCenterOnUser, setShouldCenterOnUser] = useState(false);
@@ -91,7 +129,6 @@ function UserPage({ theme = "dark" }) {
   const userMarkerRef = useRef(null);
   const mapRef = useRef(null);
 
-  // Use refs to always have latest values inside watchPosition callback
   const isNavigationActiveRef = useRef(isNavigationActive);
   const selectedHospitalRef = useRef(selectedHospital);
   const destinationReachedRef = useRef(destinationReached);
@@ -108,54 +145,72 @@ function UserPage({ theme = "dark" }) {
     destinationReachedRef.current = destinationReached;
   }, [destinationReached]);
 
-  /* Theme Config */
+  /* --------------------------------
+     DARK AND LIGHT THEME CONFIGURATION
+  --------------------------------- */
 
-const themeConfig = {
-  dark: {
-    bg: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
-    searchBg: "rgba(26,26,46,0.95)",
-    searchBorder: "rgba(255,255,255,0.15)",
-    text: "#ffffff",
-    textSecondary: "#cbd5e1",
-    statusBg: "rgba(26,26,46,0.97)",
-    neon: "#00d4ff",
+  const themeConfig = {
+    dark: {
+      bg: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
+      searchBg: "rgba(26,26,46,0.95)",
+      searchBorder: "rgba(255,255,255,0.15)",
+      text: "#ffffff",
+      textSecondary: "#cbd5e1",
+      statusBg: "rgba(26,26,46,0.97)",
+      neon: "#00d4ff",
 
-    // Correct CARTO dark map URL - NO {s} prefix
-    mapTile: "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    mapAttribution: "&copy; OpenStreetMap contributors &copy; CARTO"
-  },
+      // Correct CARTO dark map URL
+      // Important: Do not add {s}. before basemaps.
+      mapTile:
+        "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
 
-  light: {
-    bg: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-    searchBg: "rgba(255,255,255,0.95)",
-    searchBorder: "rgba(0,0,0,0.1)",
-    text: "#1e293b",
-    textSecondary: "#64748b",
-    statusBg: "rgba(255,255,255,0.97)",
-    neon: "#3b82f6",
+      mapAttribution:
+        "&copy; OpenStreetMap contributors &copy; CARTO",
+    },
 
-    // OpenStreetMap light tiles
-    mapTile: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    mapAttribution: "&copy; OpenStreetMap contributors"
-  }
-};
+    light: {
+      bg: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+      searchBg: "rgba(255,255,255,0.95)",
+      searchBorder: "rgba(0,0,0,0.1)",
+      text: "#1e293b",
+      textSecondary: "#64748b",
+      statusBg: "rgba(255,255,255,0.97)",
+      neon: "#3b82f6",
 
-const colors = themeConfig[theme] || themeConfig.dark;
+      // OpenStreetMap light map
+      mapTile:
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 
+      mapAttribution:
+        "&copy; OpenStreetMap contributors",
+    },
+  };
 
+  // IMPORTANT: Declare colors only once.
   const colors = themeConfig[theme] || themeConfig.dark;
 
-  /* GOOGLE MAPS NAVIGATION */
-  const openGoogleMapsNavigation = (hospital) => {
-    const currentLocation = `${location.lat},${location.lng}`;
-    const hospitalLocation = `${hospital.latitude},${hospital.longitude}`;
+  /* --------------------------------
+     GOOGLE MAPS NAVIGATION
+  --------------------------------- */
 
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${currentLocation}&destination=${hospitalLocation}&travelmode=driving`;
+  const openGoogleMapsNavigation = (hospital) => {
+    if (!location) return;
+
+    const currentLocation = `${location.lat},${location.lng}`;
+
+    const hospitalLocation =
+      `${hospital.latitude},${hospital.longitude}`;
+
+    const url =
+      `https://www.google.com/maps/dir/?api=1&origin=${currentLocation}&destination=${hospitalLocation}&travelmode=driving`;
 
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  /* CALL HOSPITAL */
+  /* --------------------------------
+     CALL HOSPITAL
+  --------------------------------- */
+
   const callHospital = (hospital) => {
     if (hospital.phone) {
       window.location.href = `tel:${hospital.phone}`;
@@ -164,7 +219,10 @@ const colors = themeConfig[theme] || themeConfig.dark;
     }
   };
 
-  /* Dark and Light Mode Map Controls */
+  /* --------------------------------
+     MAP THEME STYLING
+  --------------------------------- */
+
   useEffect(() => {
     const existingStyle = document.getElementById("map-theme-style");
 
@@ -196,6 +254,12 @@ const colors = themeConfig[theme] || themeConfig.dark;
           .leaflet-control-attribution a {
             color: #00d4ff !important;
           }
+
+          .leaflet-popup-content-wrapper,
+          .leaflet-popup-tip {
+            background: #26334d !important;
+            color: #ffffff !important;
+          }
         `
         : `
           .leaflet-container {
@@ -216,17 +280,32 @@ const colors = themeConfig[theme] || themeConfig.dark;
           .leaflet-control-attribution a {
             color: #2563eb !important;
           }
+
+          .leaflet-popup-content-wrapper,
+          .leaflet-popup-tip {
+            background: #ffffff !important;
+            color: #1e293b !important;
+          }
         `;
 
     document.head.appendChild(style);
 
-    return () => style.remove();
+    return () => {
+      style.remove();
+    };
   }, [theme]);
 
-  /* GPS Location - Live tracking */
+  /* --------------------------------
+     GPS LIVE TRACKING
+  --------------------------------- */
+
   useEffect(() => {
     if (!navigator.geolocation) {
-      setLocation({ lat: 9.9252, lng: 78.1198 });
+      setLocation({
+        lat: 9.9252,
+        lng: 78.1198,
+      });
+
       return;
     }
 
@@ -239,16 +318,17 @@ const colors = themeConfig[theme] || themeConfig.dark;
 
         setLocation(newLoc);
 
-        // Navigation distance update using refs
         if (
           isNavigationActiveRef.current &&
           selectedHospitalRef.current
         ) {
+          const hospital = selectedHospitalRef.current;
+
           const distanceToDestination = getDistance(
             newLoc.lat,
             newLoc.lng,
-            selectedHospitalRef.current.latitude,
-            selectedHospitalRef.current.longitude
+            hospital.latitude,
+            hospital.longitude
           );
 
           setCurrentDistance(distanceToDestination);
@@ -262,11 +342,16 @@ const colors = themeConfig[theme] || themeConfig.dark;
           }
         }
       },
+
       () => {
-        setLocation(
-          (prev) => prev || { lat: 9.9252, lng: 78.1198 }
+        setLocation((prev) =>
+          prev || {
+            lat: 9.9252,
+            lng: 78.1198,
+          }
         );
       },
+
       {
         enableHighAccuracy: true,
         timeout: 10000,
@@ -274,20 +359,26 @@ const colors = themeConfig[theme] || themeConfig.dark;
       }
     );
 
-    return () => navigator.geolocation.clearWatch(watchId);
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
-  /* Fetch Hospitals */
+  /* --------------------------------
+     FETCH HOSPITALS FROM BACKEND
+  --------------------------------- */
+
   useEffect(() => {
     axios
-      .get("https://backend-pulsepoint.onrender.com/api/hospitals")
+      .get(
+        "https://backend-pulsepoint.onrender.com/api/hospitals"
+      )
       .then((res) => {
         setHospitals(
           res.data.map((h) => ({
             ...h,
             latitude: Number(h.latitude),
             longitude: Number(h.longitude),
-            phone: h.phone || "+91 9876543210",
           }))
         );
       })
@@ -296,29 +387,41 @@ const colors = themeConfig[theme] || themeConfig.dark;
       });
   }, []);
 
-  /* Handle Hospital Selection */
+  /* --------------------------------
+     HOSPITAL SELECTION
+  --------------------------------- */
+
   const handleHospitalClick = (hospital) => {
     setSelectedHospital(hospital);
     setSidePanelOpen(true);
     setDestinationReached(false);
   };
 
-  /* Close Side Panel */
+  /* --------------------------------
+     CLOSE SIDE PANEL
+  --------------------------------- */
+
   const closeSidePanel = () => {
     setSidePanelOpen(false);
   };
 
-  /* Start App Navigation */
+  /* --------------------------------
+     START NAVIGATION
+  --------------------------------- */
+
   const startNavigation = async (hospital) => {
+    if (!location) return;
+
     setDestinationReached(false);
 
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${location.lng},${location.lat};${hospital.longitude},${hospital.latitude}?overview=full`;
+      const url =
+        `https://router.project-osrm.org/route/v1/driving/${location.lng},${location.lat};${hospital.longitude},${hospital.latitude}?overview=full&geometries=geojson`;
 
       const res = await fetch(url);
       const data = await res.json();
 
-      if (data.routes?.[0]?.geometry) {
+      if (data.routes?.[0]?.geometry?.coordinates) {
         setRouteCoordinates(
           data.routes[0].geometry.coordinates.map(
             ([lng, lat]) => [lat, lng]
@@ -341,7 +444,9 @@ const colors = themeConfig[theme] || themeConfig.dark;
           hospital.longitude
         )
       );
-    } catch {
+    } catch (error) {
+      console.error("Navigation route error:", error);
+
       setRouteCoordinates([
         [location.lat, location.lng],
         [hospital.latitude, hospital.longitude],
@@ -360,7 +465,10 @@ const colors = themeConfig[theme] || themeConfig.dark;
     }
   };
 
-  /* Stop Navigation */
+  /* --------------------------------
+     STOP NAVIGATION
+  --------------------------------- */
+
   const stopNavigation = () => {
     setIsNavigationActive(false);
     setRouteCoordinates([]);
@@ -368,7 +476,10 @@ const colors = themeConfig[theme] || themeConfig.dark;
     setDestinationReached(false);
   };
 
-  /* Reset Everything */
+  /* --------------------------------
+     RESET EVERYTHING
+  --------------------------------- */
+
   const resetToNormal = () => {
     setIsNavigationActive(false);
     setRouteCoordinates([]);
@@ -379,16 +490,27 @@ const colors = themeConfig[theme] || themeConfig.dark;
     setSearch("");
     setShouldCenterOnUser(true);
 
-    setTimeout(() => setShouldCenterOnUser(false), 100);
+    setTimeout(() => {
+      setShouldCenterOnUser(false);
+    }, 100);
   };
 
-  /* Back to Start */
+  /* --------------------------------
+     BACK TO START
+  --------------------------------- */
+
   const backToStart = () => {
     setSearch("");
     setShouldCenterOnUser(true);
 
-    setTimeout(() => setShouldCenterOnUser(false), 100);
+    setTimeout(() => {
+      setShouldCenterOnUser(false);
+    }, 100);
   };
+
+  /* --------------------------------
+     LOCATION LOADING SCREEN
+  --------------------------------- */
 
   if (!location) {
     return (
@@ -425,12 +547,21 @@ const colors = themeConfig[theme] || themeConfig.dark;
           🔐 Getting location...
         </div>
 
-        <div style={{ fontSize: 14, color: colors.textSecondary }}>
+        <div
+          style={{
+            fontSize: 14,
+            color: colors.textSecondary,
+          }}
+        >
           Allow location access
         </div>
       </div>
     );
   }
+
+  /* --------------------------------
+     HOSPITAL DISTANCES
+  --------------------------------- */
 
   const hospitalsWithDistance = hospitals.map((h) => ({
     ...h,
@@ -442,9 +573,13 @@ const colors = themeConfig[theme] || themeConfig.dark;
     ),
   }));
 
-  const searchedHospital = search
+  /* --------------------------------
+     HOSPITAL SEARCH
+  --------------------------------- */
+
+  const searchedHospital = search.trim()
     ? hospitalsWithDistance.find((h) =>
-        h.name.toLowerCase().includes(search.toLowerCase())
+        h.name?.toLowerCase().includes(search.toLowerCase())
       )
     : null;
 
@@ -452,27 +587,45 @@ const colors = themeConfig[theme] || themeConfig.dark;
     ? [searchedHospital]
     : hospitalsWithDistance;
 
+  /* --------------------------------
+     NEARBY HOSPITAL COUNT
+  --------------------------------- */
+
   const nearbyHospitalsCount = hospitalsWithDistance.filter(
     (h) => h.distance <= 5
   ).length;
+
+  /* --------------------------------
+     MAP BOUNDS
+  --------------------------------- */
 
   const bounds =
     selectedHospital && !shouldCenterOnUser
       ? [
           [location.lat, location.lng],
-          [selectedHospital.latitude, selectedHospital.longitude],
+          [
+            selectedHospital.latitude,
+            selectedHospital.longitude,
+          ],
         ]
       : [];
+
+  /* --------------------------------
+     MAIN USER PAGE UI
+  --------------------------------- */
 
   return (
     <div
       style={{
         height: "100vh",
-        width: "100vw",
+        width: "100%",
         position: "relative",
         overflow: "hidden",
+        background: colors.bg,
       }}
     >
+      {/* DESTINATION REACHED MESSAGE */}
+
       {destinationReached && (
         <div
           style={{
@@ -487,7 +640,6 @@ const colors = themeConfig[theme] || themeConfig.dark;
             borderRadius: 24,
             boxShadow: "0 20px 60px rgba(0,255,136,0.5)",
             textAlign: "center",
-            animation: "slideIn 0.5s ease",
           }}
         >
           <div style={{ fontSize: 60, marginBottom: 16 }}>
@@ -498,7 +650,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
             style={{
               fontSize: 24,
               fontWeight: "bold",
-              color: "#fff",
+              color: "#ffffff",
               marginBottom: 8,
             }}
           >
@@ -508,7 +660,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
           <div
             style={{
               fontSize: 16,
-              color: "#fff",
+              color: "#ffffff",
               marginBottom: 24,
             }}
           >
@@ -519,21 +671,14 @@ const colors = themeConfig[theme] || themeConfig.dark;
             onClick={resetToNormal}
             style={{
               padding: "14px 32px",
-              background: "#fff",
-              color: "#00ff88",
+              background: "#ffffff",
+              color: "#00cc77",
               border: "none",
               borderRadius: 12,
               fontWeight: "bold",
               fontSize: 16,
               cursor: "pointer",
-              transition: "all 0.3s ease",
             }}
-            onMouseEnter={(e) =>
-              (e.target.style.transform = "scale(1.05)")
-            }
-            onMouseLeave={(e) =>
-              (e.target.style.transform = "scale(1)")
-            }
           >
             ✅ Done
           </button>
@@ -541,6 +686,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
       )}
 
       {/* TOP STATUS BAR */}
+
       <div
         style={{
           position: "absolute",
@@ -561,6 +707,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            gap: 10,
           }}
         >
           <div
@@ -574,6 +721,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
               style={{
                 width: 12,
                 height: 12,
+                flexShrink: 0,
                 background: isNavigationActive
                   ? "#00ff88"
                   : colors.neon,
@@ -606,7 +754,8 @@ const colors = themeConfig[theme] || themeConfig.dark;
                   color: colors.textSecondary,
                 }}
               >
-                {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                {location.lat.toFixed(4)},{" "}
+                {location.lng.toFixed(4)}
               </div>
             </div>
           </div>
@@ -622,7 +771,8 @@ const colors = themeConfig[theme] || themeConfig.dark;
               style={{
                 fontSize: 12,
                 color: colors.neon,
-                fontWeight: 500,
+                fontWeight: 600,
+                whiteSpace: "nowrap",
               }}
             >
               🟢 {nearbyHospitalsCount} nearby
@@ -639,15 +789,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
                 fontSize: 12,
                 fontWeight: "bold",
                 cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = colors.neon;
-                e.target.style.color = "#fff";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = colors.searchBg;
-                e.target.style.color = colors.text;
+                whiteSpace: "nowrap",
               }}
             >
               📍 Back to Start
@@ -657,6 +799,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
       </div>
 
       {/* HOSPITAL SEARCH */}
+
       <div
         style={{
           position: "absolute",
@@ -689,12 +832,14 @@ const colors = themeConfig[theme] || themeConfig.dark;
       </div>
 
       {/* HOSPITAL DETAILS SIDE PANEL */}
+
       <div
         style={{
           position: "fixed",
           top: 0,
           right: sidePanelOpen ? 0 : "-400px",
           width: "400px",
+          maxWidth: "100vw",
           height: "100%",
           background: colors.statusBg,
           backdropFilter: "blur(20px)",
@@ -735,22 +880,13 @@ const colors = themeConfig[theme] || themeConfig.dark;
                   color: colors.text,
                   fontSize: 24,
                   cursor: "pointer",
-                  padding: 0,
                   width: 32,
                   height: 32,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   borderRadius: "50%",
-                  transition: "background 0.2s ease",
                 }}
-                onMouseEnter={(e) =>
-                  (e.target.style.background =
-                    "rgba(255,255,255,0.1)")
-                }
-                onMouseLeave={(e) =>
-                  (e.target.style.background = "transparent")
-                }
               >
                 ×
               </button>
@@ -760,13 +896,15 @@ const colors = themeConfig[theme] || themeConfig.dark;
               style={{
                 flex: 1,
                 overflowY: "auto",
-                padding: "24px",
+                padding: 24,
               }}
             >
+              {/* HOSPITAL NAME */}
+
               <div
                 style={{
                   background: `linear-gradient(135deg, ${colors.neon}20, ${colors.neon}10)`,
-                  padding: "20px",
+                  padding: 20,
                   borderRadius: 16,
                   marginBottom: 24,
                   border: `1px solid ${colors.neon}40`,
@@ -790,19 +928,24 @@ const colors = themeConfig[theme] || themeConfig.dark;
                   }}
                 >
                   📍{" "}
-                  {currentDistance
-                    ? currentDistance.toFixed(2)
-                    : selectedHospital.distance.toFixed(2)}{" "}
+                  {(currentDistance ??
+                    selectedHospital.distance ??
+                    0
+                  ).toFixed(2)}{" "}
                   km away
                 </div>
               </div>
+
+              {/* DISTANCE INFORMATION */}
 
               <div
                 style={{
                   background: isNavigationActive
                     ? "rgba(0,255,136,0.1)"
-                    : "rgba(255,255,255,0.05)",
-                  padding: "16px",
+                    : theme === "dark"
+                      ? "rgba(255,255,255,0.05)"
+                      : "rgba(0,0,0,0.04)",
+                  padding: 16,
                   borderRadius: 12,
                   marginBottom: 24,
                   border: isNavigationActive
@@ -832,9 +975,10 @@ const colors = themeConfig[theme] || themeConfig.dark;
                     marginTop: 8,
                   }}
                 >
-                  {currentDistance
-                    ? currentDistance.toFixed(2)
-                    : selectedHospital.distance.toFixed(2)}{" "}
+                  {(currentDistance ??
+                    selectedHospital.distance ??
+                    0
+                  ).toFixed(2)}{" "}
                   km
                 </div>
 
@@ -851,11 +995,13 @@ const colors = themeConfig[theme] || themeConfig.dark;
                 )}
               </div>
 
+              {/* NAVIGATION STATUS */}
+
               {isNavigationActive && !destinationReached && (
                 <div
                   style={{
                     background: "rgba(0,255,136,0.1)",
-                    padding: "16px",
+                    padding: 16,
                     borderRadius: 12,
                     marginBottom: 24,
                     border: "1px solid rgba(0,255,136,0.3)",
@@ -874,6 +1020,8 @@ const colors = themeConfig[theme] || themeConfig.dark;
                 </div>
               )}
 
+              {/* ACTION BUTTONS */}
+
               <div
                 style={{
                   display: "flex",
@@ -882,10 +1030,11 @@ const colors = themeConfig[theme] || themeConfig.dark;
                 }}
               >
                 {/* CALL HOSPITAL */}
+
                 <button
                   onClick={() => callHospital(selectedHospital)}
                   style={{
-                    padding: "16px",
+                    padding: 16,
                     background:
                       "linear-gradient(135deg, #00ff88, #00cc6f)",
                     color: "white",
@@ -895,28 +1044,20 @@ const colors = themeConfig[theme] || themeConfig.dark;
                     fontSize: 15,
                     cursor: "pointer",
                     boxShadow: "0 8px 24px rgba(0,255,136,0.4)",
-                    transition: "all 0.3s ease",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
                   }}
-                  onMouseEnter={(e) =>
-                    (e.target.style.transform = "scale(1.05)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.target.style.transform = "scale(1)")
-                  }
                 >
                   📞 Call Hospital
                 </button>
 
                 {/* START / STOP NAVIGATION */}
+
                 {!isNavigationActive ? (
                   <button
-                    onClick={() => startNavigation(selectedHospital)}
+                    onClick={() =>
+                      startNavigation(selectedHospital)
+                    }
                     style={{
-                      padding: "16px",
+                      padding: 16,
                       background: `linear-gradient(135deg, ${colors.neon}, ${colors.neon}dd)`,
                       color: "white",
                       border: "none",
@@ -925,14 +1066,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
                       fontSize: 15,
                       cursor: "pointer",
                       boxShadow: `0 8px 24px ${colors.neon}40`,
-                      transition: "all 0.3s ease",
                     }}
-                    onMouseEnter={(e) =>
-                      (e.target.style.transform = "scale(1.05)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.target.style.transform = "scale(1)")
-                    }
                   >
                     🚗 Start Navigation Here
                   </button>
@@ -940,7 +1074,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
                   <button
                     onClick={stopNavigation}
                     style={{
-                      padding: "16px",
+                      padding: 16,
                       background: "#ff4444",
                       color: "white",
                       border: "none",
@@ -948,43 +1082,33 @@ const colors = themeConfig[theme] || themeConfig.dark;
                       fontWeight: "bold",
                       fontSize: 15,
                       cursor: "pointer",
-                      boxShadow: "0 8px 24px rgba(255,68,68,0.4)",
-                      transition: "all 0.3s ease",
+                      boxShadow:
+                        "0 8px 24px rgba(255,68,68,0.4)",
                     }}
-                    onMouseEnter={(e) =>
-                      (e.target.style.transform = "scale(1.05)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.target.style.transform = "scale(1)")
-                    }
                   >
                     🛑 Stop Navigation
                   </button>
                 )}
 
                 {/* GOOGLE MAPS */}
+
                 <button
                   onClick={() =>
                     openGoogleMapsNavigation(selectedHospital)
                   }
                   style={{
-                    padding: "16px",
-                    background: "rgba(255,255,255,0.95)",
-                    color: colors.neon,
+                    padding: 16,
+                    background: theme === "dark"
+                      ? "#ffffff"
+                      : "#eff6ff",
+                    color: "#2563eb",
                     border: `2px solid ${colors.neon}`,
                     borderRadius: 14,
                     fontWeight: "bold",
                     fontSize: 15,
                     cursor: "pointer",
                     boxShadow: `0 8px 24px ${colors.neon}30`,
-                    transition: "all 0.3s ease",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.target.style.transform = "scale(1.05)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.target.style.transform = "scale(1)")
-                  }
                 >
                   🌐 Open in Google Maps
                 </button>
@@ -994,15 +1118,24 @@ const colors = themeConfig[theme] || themeConfig.dark;
         )}
       </div>
 
-      {/* LEAFLET MAP */}
+      {/* --------------------------------
+          LEAFLET MAP
+      --------------------------------- */}
+
       <MapContainer
         center={[location.lat, location.lng]}
         zoom={13}
-        style={{ height: "100vh", width: "100vw" }}
+        style={{
+          height: "100%",
+          width: "100%",
+          background: theme === "dark" ? "#1a1a2e" : "#f8fafc",
+        }}
         ref={mapRef}
         zoomControl={true}
         scrollWheelZoom={true}
       >
+        {/* MAP TILES - THEME CHANGES HERE */}
+
         <TileLayer
           key={theme}
           url={colors.mapTile}
@@ -1011,18 +1144,20 @@ const colors = themeConfig[theme] || themeConfig.dark;
         />
 
         {/* 5 KM RADIUS */}
+
         <Circle
           center={[location.lat, location.lng]}
           radius={5000}
           pathOptions={{
             color: colors.neon,
             fillColor: colors.neon,
-            fillOpacity: 0.2,
+            fillOpacity: theme === "dark" ? 0.2 : 0.15,
             weight: 3,
           }}
         />
 
-        {/* USER LOCATION */}
+        {/* USER LOCATION MARKER */}
+
         <Marker
           position={[location.lat, location.lng]}
           ref={userMarkerRef}
@@ -1049,6 +1184,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
         </Marker>
 
         {/* HOSPITAL MARKERS */}
+
         {hospitalsToShow.map((h) => (
           <Marker
             key={h._id}
@@ -1100,6 +1236,7 @@ const colors = themeConfig[theme] || themeConfig.dark;
         ))}
 
         {/* NAVIGATION ROUTE */}
+
         {routeCoordinates.length > 1 && (
           <Polyline
             positions={routeCoordinates}
@@ -1109,9 +1246,13 @@ const colors = themeConfig[theme] || themeConfig.dark;
           />
         )}
 
+        {/* FIT BOUNDS */}
+
         {bounds.length > 0 && (
           <FitBounds bounds={bounds} maxZoom={14} />
         )}
+
+        {/* CENTER ON USER */}
 
         {shouldCenterOnUser && (
           <CenterOnUser
@@ -1121,12 +1262,19 @@ const colors = themeConfig[theme] || themeConfig.dark;
         )}
       </MapContainer>
 
-      {/* ANIMATIONS */}
+      {/* --------------------------------
+          ANIMATIONS
+      --------------------------------- */}
+
       <style>
         {`
           @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
           }
 
           @keyframes pulse {
@@ -1134,7 +1282,6 @@ const colors = themeConfig[theme] || themeConfig.dark;
               opacity: 1;
               transform: scale(1);
             }
-
             50% {
               opacity: 0.7;
               transform: scale(1.08);
@@ -1146,7 +1293,6 @@ const colors = themeConfig[theme] || themeConfig.dark;
               transform: translate(-50%, -50%) scale(0.8);
               opacity: 0;
             }
-
             100% {
               transform: translate(-50%, -50%) scale(1);
               opacity: 1;
