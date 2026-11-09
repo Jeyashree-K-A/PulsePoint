@@ -120,7 +120,7 @@ function UserPage({ theme = "dark" }) {
       neon: "#00d4ff",
 
       // Dark map tiles
-      mapTile: "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      mapTile: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
       mapAttribution:
         "&copy; OpenStreetMap contributors &copy; CARTO",
     },
