@@ -10,28 +10,21 @@ const THEME = {
     bg: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
     topBar: "rgba(26,26,46,0.95)",
     text: "#ffffff",
-    textSub: "#1e293b",
     btnBg: "rgba(255,255,255,0.15)",
     btnBorder: "rgba(255,255,255,0.3)",
     btnBg2: "linear-gradient(135deg, #00d4ff, #0099cc)",
     shadow: "0 4px 20px rgba(0,0,0,0.5)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    contentBg: "rgba(26,26,46,0.3)",
-    buttonBg: "linear-gradient(135deg, #00d4ff, #0099cc)"
+    border: "1px solid rgba(255,255,255,0.1)"
   },
-
   light: {
     bg: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
     topBar: "rgba(255,255,255,0.95)",
     text: "#111827",
-    textSub: "#1e293b",
     btnBg: "rgba(59,130,246,0.1)",
     btnBorder: "#3b82f6",
     btnBg2: "linear-gradient(135deg, #f8fafc, #e2e8f0)",
     shadow: "0 2px 10px rgba(0,0,0,0.1)",
-    border: "1px solid #e2e8f0",
-    contentBg: "rgba(255,255,255,0.3)",
-    buttonBg: "linear-gradient(135deg, #3b82f6, #2563eb)"
+    border: "1px solid #e2e8f0"
   }
 };
 
@@ -44,15 +37,12 @@ function App() {
 
   const toggleMode = () => {
     const newMode = mode === "user" ? "admin" : "user";
-
     setMode(newMode);
     navigate(newMode === "admin" ? "/admin" : "/");
   };
 
   const toggleTheme = () => {
-    setTheme((prevTheme) =>
-      prevTheme === "dark" ? "light" : "dark"
-    );
+    setTheme(prev => prev === "dark" ? "light" : "dark");
   };
 
   return (
@@ -66,7 +56,6 @@ function App() {
         flexDirection: "column"
       }}
     >
-      {/* TOP BAR */}
       <div
         style={{
           height: 60,
@@ -85,22 +74,14 @@ function App() {
           zIndex: 1000
         }}
       >
-        {/* LOGO AND TITLE */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div
             style={{
               width: 45,
               height: 45,
-              background:
-                theme === "dark"
-                  ? "linear-gradient(135deg, #00d4ff, #0099cc)"
-                  : "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+              background: theme === "dark"
+                ? "linear-gradient(135deg, #00d4ff, #0099cc)"
+                : "linear-gradient(135deg, #3b82f6, #1d4ed8)",
               borderRadius: "50%",
               display: "flex",
               alignItems: "center",
@@ -119,10 +100,9 @@ function App() {
               fontSize: 22,
               fontWeight: 900,
               color: c.text,
-              textShadow:
-                theme === "dark"
-                  ? "0 0 15px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.5)"
-                  : "0 2px 4px rgba(0,0,0,0.1)",
+              textShadow: theme === "dark"
+                ? "0 0 15px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.5)"
+                : "0 2px 4px rgba(0,0,0,0.1)",
               letterSpacing: "1px"
             }}
           >
@@ -130,15 +110,7 @@ function App() {
           </div>
         </div>
 
-        {/* ACTION BUTTONS */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12
-          }}
-        >
-          {/* USER / ADMIN BUTTON */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button
             onClick={toggleMode}
             style={{
@@ -152,47 +124,35 @@ function App() {
               fontSize: 15,
               transition: "all 0.3s ease",
               backdropFilter: "blur(15px)",
-              boxShadow:
-                theme === "dark"
-                  ? "0 4px 20px rgba(0,212,255,0.2)"
-                  : "0 2px 10px rgba(59,130,246,0.2)"
+              boxShadow: theme === "dark"
+                ? "0 4px 20px rgba(0,212,255,0.2)"
+                : "0 2px 10px rgba(59,130,246,0.2)"
             }}
           >
             {mode === "user" ? "👮 ADMIN" : "👤 USER"}
           </button>
 
-          {/* DARK / LIGHT THEME BUTTON */}
           <button
             onClick={toggleTheme}
-            aria-label={
-              theme === "dark"
-                ? "Switch to light mode"
-                : "Switch to dark mode"
-            }
-            title={
-              theme === "dark"
-                ? "Switch to light mode"
-                : "Switch to dark mode"
-            }
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             style={{
               width: 55,
               height: 55,
               background: c.btnBg2,
               color: c.text,
-              border:
-                theme === "dark"
-                  ? "1px solid rgba(255,255,255,0.3)"
-                  : "1px solid #cbd5e1",
+              border: theme === "dark"
+                ? "1px solid rgba(255,255,255,0.3)"
+                : "1px solid #cbd5e1",
               borderRadius: "50%",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               fontSize: 22,
-              boxShadow:
-                theme === "dark"
-                  ? "0 10px 30px rgba(0,212,255,0.5)"
-                  : "0 4px 20px rgba(0,0,0,0.1)",
+              boxShadow: theme === "dark"
+                ? "0 10px 30px rgba(0,212,255,0.5)"
+                : "0 4px 20px rgba(0,0,0,0.1)",
               transition: "all 0.3s ease"
             }}
           >
@@ -201,7 +161,6 @@ function App() {
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
       <div
         style={{
           flex: 1,
