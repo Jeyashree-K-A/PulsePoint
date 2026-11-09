@@ -112,7 +112,7 @@ function CenterOnUser({ center, zoom }) {
    USER PAGE COMPONENT
 --------------------------------- */
 
-function UserPage({ theme = "dark" }) {
+function UserPage({ theme = "light" }) {
   const [location, setLocation] = useState(null);
   const [hospitals, setHospitals] = useState([]);
   const [search, setSearch] = useState("");
@@ -149,45 +149,21 @@ function UserPage({ theme = "dark" }) {
      DARK AND LIGHT THEME CONFIGURATION
   --------------------------------- */
 
-  const themeConfig = {
-    dark: {
-      bg: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
-      searchBg: "rgba(26,26,46,0.95)",
-      searchBorder: "rgba(255,255,255,0.15)",
-      text: "#ffffff",
-      textSecondary: "#cbd5e1",
-      statusBg: "rgba(26,26,46,0.97)",
-      neon: "#00d4ff",
+const themeConfig = {
+  light: {
+    bg: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+    searchBg: "rgba(255,255,255,0.95)",
+    searchBorder: "rgba(0,0,0,0.1)",
+    text: "#1e293b",
+    textSecondary: "#64748b",
+    statusBg: "rgba(255,255,255,0.97)",
+    neon: "#3b82f6",
+    mapTile: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    mapAttribution: "&copy; OpenStreetMap contributors",
+  },
+};
 
-      // Correct CARTO dark map URL
-      // Important: Do not add {s}. before basemaps.
-      mapTile:
-        "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-
-      mapAttribution:
-        "&copy; OpenStreetMap contributors &copy; CARTO",
-    },
-
-    light: {
-      bg: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-      searchBg: "rgba(255,255,255,0.95)",
-      searchBorder: "rgba(0,0,0,0.1)",
-      text: "#1e293b",
-      textSecondary: "#64748b",
-      statusBg: "rgba(255,255,255,0.97)",
-      neon: "#3b82f6",
-
-      // OpenStreetMap light map
-      mapTile:
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-      mapAttribution:
-        "&copy; OpenStreetMap contributors",
-    },
-  };
-
-  // IMPORTANT: Declare colors only once.
-  const colors = themeConfig[theme] || themeConfig.dark;
+const colors = themeConfig.light;
 
   /* --------------------------------
      GOOGLE MAPS NAVIGATION
@@ -233,60 +209,32 @@ function UserPage({ theme = "dark" }) {
     const style = document.createElement("style");
     style.id = "map-theme-style";
 
-    style.textContent =
-      theme === "dark"
-        ? `
-          .leaflet-container {
-            background: #1a1a2e !important;
-          }
+    style.textContent = `
+  .leaflet-container {
+    background: #f8fafc !important;
+  }
 
-          .leaflet-control-zoom a {
-            background: #26334d !important;
-            color: #ffffff !important;
-            border-color: #46536b !important;
-          }
+  .leaflet-control-zoom a {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border-color: #cbd5e1 !important;
+  }
 
-          .leaflet-control-attribution {
-            background: rgba(0, 0, 0, 0.8) !important;
-            color: #ffffff !important;
-          }
+  .leaflet-control-attribution {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #1e293b !important;
+  }
 
-          .leaflet-control-attribution a {
-            color: #00d4ff !important;
-          }
+  .leaflet-control-attribution a {
+    color: #2563eb !important;
+  }
 
-          .leaflet-popup-content-wrapper,
-          .leaflet-popup-tip {
-            background: #26334d !important;
-            color: #ffffff !important;
-          }
-        `
-        : `
-          .leaflet-container {
-            background: #f8fafc !important;
-          }
-
-          .leaflet-control-zoom a {
-            background: #ffffff !important;
-            color: #1e293b !important;
-            border-color: #cbd5e1 !important;
-          }
-
-          .leaflet-control-attribution {
-            background: rgba(255, 255, 255, 0.9) !important;
-            color: #1e293b !important;
-          }
-
-          .leaflet-control-attribution a {
-            color: #2563eb !important;
-          }
-
-          .leaflet-popup-content-wrapper,
-          .leaflet-popup-tip {
-            background: #ffffff !important;
-            color: #1e293b !important;
-          }
-        `;
+  .leaflet-popup-content-wrapper,
+  .leaflet-popup-tip {
+    background: #ffffff !important;
+    color: #1e293b !important;
+  }
+`;
 
     document.head.appendChild(style);
 
