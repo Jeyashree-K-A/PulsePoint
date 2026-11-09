@@ -119,7 +119,7 @@ function UserPage({ theme = "dark" }) {
       statusBg: "rgba(26,26,46,0.95)",
       neon: "#00d4ff",
 
-      // Updated CARTO dark map tile URL
+      // Dark map tiles
       mapTile: "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
       mapAttribution:
         "&copy; OpenStreetMap contributors &copy; CARTO",
@@ -134,6 +134,7 @@ function UserPage({ theme = "dark" }) {
       statusBg: "rgba(255,255,255,0.9)",
       neon: "#3b82f6",
 
+      // Light map tiles
       mapTile: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       mapAttribution: "&copy; OpenStreetMap contributors",
     },
@@ -160,29 +161,63 @@ function UserPage({ theme = "dark" }) {
     }
   };
 
-  /* Dark mode CSS */
+  /* Dark and Light Mode Map Controls */
   useEffect(() => {
-    if (theme === "dark") {
-      const style = document.createElement("style");
-      style.id = "map-dark-theme";
+    const existingStyle = document.getElementById("map-theme-style");
 
-      style.textContent = `
-        .leaflet-container .leaflet-control-zoom,
-        .leaflet-container a.leaflet-control-zoom-in,
-        .leaflet-container a.leaflet-control-zoom-out {
-          filter: brightness(0.6) invert(1) contrast(1.2) hue-rotate(180deg) saturate(0.8) !important;
-        }
-
-        .leaflet-container .leaflet-control-attribution {
-          background: rgba(0,0,0,0.8) !important;
-          color: #ccc !important;
-        }
-      `;
-
-      document.head.appendChild(style);
-
-      return () => document.getElementById("map-dark-theme")?.remove();
+    if (existingStyle) {
+      existingStyle.remove();
     }
+
+    const style = document.createElement("style");
+    style.id = "map-theme-style";
+
+    style.textContent =
+      theme === "dark"
+        ? `
+          .leaflet-container {
+            background: #1a1a2e !important;
+          }
+
+          .leaflet-control-zoom a {
+            background: #26334d !important;
+            color: #ffffff !important;
+            border-color: #46536b !important;
+          }
+
+          .leaflet-control-attribution {
+            background: rgba(0, 0, 0, 0.8) !important;
+            color: #ffffff !important;
+          }
+
+          .leaflet-control-attribution a {
+            color: #00d4ff !important;
+          }
+        `
+        : `
+          .leaflet-container {
+            background: #f8fafc !important;
+          }
+
+          .leaflet-control-zoom a {
+            background: #ffffff !important;
+            color: #1e293b !important;
+            border-color: #cbd5e1 !important;
+          }
+
+          .leaflet-control-attribution {
+            background: rgba(255, 255, 255, 0.9) !important;
+            color: #1e293b !important;
+          }
+
+          .leaflet-control-attribution a {
+            color: #2563eb !important;
+          }
+        `;
+
+    document.head.appendChild(style);
+
+    return () => style.remove();
   }, [theme]);
 
   /* GPS Location - Live tracking */
@@ -966,6 +1001,7 @@ function UserPage({ theme = "dark" }) {
         scrollWheelZoom={true}
       >
         <TileLayer
+          key={theme}
           url={colors.mapTile}
           attribution={colors.mapAttribution}
         />
