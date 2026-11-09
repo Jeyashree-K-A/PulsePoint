@@ -109,36 +109,39 @@ function UserPage({ theme = "dark" }) {
   }, [destinationReached]);
 
   /* Theme Config */
-  const themeConfig = {
-    dark: {
-      bg: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
-      searchBg: "rgba(255,255,255,0.05)",
-      searchBorder: "rgba(255,255,255,0.1)",
-      text: "#fff",
-      textSecondary: "#a0a0a0",
-      statusBg: "rgba(26,26,46,0.95)",
-      neon: "#00d4ff",
 
-      // Dark map tiles
-      mapTile: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      mapAttribution:
-        "&copy; OpenStreetMap contributors &copy; CARTO",
-    },
+const themeConfig = {
+  dark: {
+    bg: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
+    searchBg: "rgba(26,26,46,0.95)",
+    searchBorder: "rgba(255,255,255,0.15)",
+    text: "#ffffff",
+    textSecondary: "#cbd5e1",
+    statusBg: "rgba(26,26,46,0.97)",
+    neon: "#00d4ff",
 
-    light: {
-      bg: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-      searchBg: "rgba(255,255,255,0.8)",
-      searchBorder: "rgba(0,0,0,0.1)",
-      text: "#1e293b",
-      textSecondary: "#64748b",
-      statusBg: "rgba(255,255,255,0.9)",
-      neon: "#3b82f6",
+    // Correct CARTO dark map URL - NO {s} prefix
+    mapTile: "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    mapAttribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+  },
 
-      // Light map tiles
-      mapTile: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      mapAttribution: "&copy; OpenStreetMap contributors",
-    },
-  };
+  light: {
+    bg: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+    searchBg: "rgba(255,255,255,0.95)",
+    searchBorder: "rgba(0,0,0,0.1)",
+    text: "#1e293b",
+    textSecondary: "#64748b",
+    statusBg: "rgba(255,255,255,0.97)",
+    neon: "#3b82f6",
+
+    // OpenStreetMap light tiles
+    mapTile: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    mapAttribution: "&copy; OpenStreetMap contributors"
+  }
+};
+
+const colors = themeConfig[theme] || themeConfig.dark;
+
 
   const colors = themeConfig[theme] || themeConfig.dark;
 
@@ -1003,8 +1006,8 @@ function UserPage({ theme = "dark" }) {
         <TileLayer
           key={theme}
           url={colors.mapTile}
-          subdomains="abcd"
           attribution={colors.mapAttribution}
+          maxZoom={19}
         />
 
         {/* 5 KM RADIUS */}
