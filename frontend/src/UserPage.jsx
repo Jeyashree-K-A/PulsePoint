@@ -1003,6 +1003,7 @@ function UserPage({ theme = "dark" }) {
         <TileLayer
           key={theme}
           url={colors.mapTile}
+          subdomains="abcd"
           attribution={colors.mapAttribution}
         />
 
