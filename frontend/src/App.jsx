@@ -22,7 +22,9 @@ const THEME = {
 function App() {
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState("user");
+ const [mode, setMode] = useState(
+  window.location.pathname === "/admin" ? "admin" : "user"
+);
 
   const c = THEME;
 
