@@ -142,7 +142,7 @@ function App() {
         <Routes>
           <Route path="/" element={<UserPage theme={theme} />} />
           <Route path="/admin" element={<AdminPanel theme={theme} />} />
-          <Route path="*" element={<UserPage theme={theme} />} />
+          <<Route path="/" element={<UserPage theme={theme} />} />
         </Routes>
       </div>
     </div>
