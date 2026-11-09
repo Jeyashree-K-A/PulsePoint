@@ -1,4 +1,10 @@
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate
+} from "react-router-dom";
 
 import AdminPanel from "./components/AdminPanel.jsx";
 import UserPage from "./UserPage.jsx";
@@ -16,7 +22,7 @@ const THEME = {
 function App() {
   const navigate = useNavigate();
 
-  const [mode, setMode] = React.useState("user");
+  const [mode, setMode] = useState("user");
 
   const c = THEME;
 
